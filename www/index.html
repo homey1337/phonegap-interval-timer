@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width, height=device-height">
+        <title>Interval Timer</title>
+        <style type="text/css">
+            canvas {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+            }
+            * {
+                font-size: xx-large;
+            }
+            #interval_length {
+                width: 50%;
+            }
+            .formrow {
+                text-align: center;
+                padding: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <form>
+            <div class="formrow">Length: <input id="interval_length" type="number" value="30"/></div>
+            <div class="formrow"><input type="button" value="Get going!" onclick="get_going();"/></div>
+        </form>
+        <canvas id="canvas"> </canvas>
+        <script type="text/javascript" src="cordova.js"></script>
+        <script type="text/javascript">
+            var canvas;
+            var ctx;
+            var start_time;
+
+            var angle = 0;
+            var color = "red";
+            var last_color = "green";
+            var interval = 30;
+
+            function init() {
+                canvas = document.getElementById("canvas");
+                ctx = canvas.getContext("2d");
+                start_time = new Date();
+
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+
+                window.setInterval(draw, 3);
+                
+                canvas.addEventListener('click', function(event) { canvas.style.display = 'none'; }, false);
+                last_color = randomColor();
+                color = randomColor();
+            }
+
+            function get_going() {
+                canvas.style.display = 'block';
+                start_time = new Date();
+                interval = document.getElementById('interval_length').value;
+            }
+
+            function draw() {
+                var right_now = new Date();
+                var delta = (right_now.getTime() - start_time.getTime()) / 1000;
+                var seconds = interval - delta;
+                if (seconds < 0) {
+                    start_time = right_now;
+                    seconds = interval;
+                    last_color = color;
+                    color = randomColor();
+                }
+
+                ctx.fillStyle = last_color;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                if (seconds < 1) {
+                    angle = Math.PI*2*(1-seconds);
+                    ctx.beginPath();
+                    ctx.moveTo(canvas.width/2, canvas.height/2);
+                    ctx.arc(canvas.width/2, canvas.height/2, canvas.height*2, 0, angle);
+                    ctx.lineTo(canvas.width/2, canvas.height/2);
+                    ctx.fillStyle = color;
+                    ctx.fill();
+                }
+                
+                textsize = canvas.height / 2;
+                ctx.font = textsize + "px sans";
+                ctx.fillStyle = "black";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(Math.floor(seconds + 1).toString(), canvas.width/2, canvas.height/2);
+            }
+            
+            function randomColor() {
+                var letters = "0123456789ABCDEF";
+                var color = "#";
+                for (var i = 0; i < 6; i++) {
+                    color += letters[Math.floor(Math.random() * 16)];
+                }
+                return color;
+            }
+
+            init();
+        </script>
+    </body>
+</html>
